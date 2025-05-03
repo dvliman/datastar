@@ -1,0 +1,16 @@
+.DS_Store
+.idea
+*.log
+tmp/
+.cpcache
+.nrepl-port
+.shadow-cljs
+node_modules
+public/js
+public/css
+.clj-kondo
+.lsp
+docker
+target
+giata.csv
+web/.astro
