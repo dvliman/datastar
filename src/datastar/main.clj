@@ -9,9 +9,10 @@
 
 (def config
   {:datastar.http/handler {}
-   :datastar.http/server {:handler (ig/ref :datastar.http/handler)
-                      :port 5001
-                      :join? false}})
+   :datastar.http/server
+   {:handler (ig/ref :datastar.http/handler)
+    :port 5001
+    :join? false}})
 
 (def base-url "http://localhost:5001")
 

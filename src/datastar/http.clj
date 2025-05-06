@@ -1,6 +1,8 @@
 (ns datastar.http
   (:require
+   [clojure.stacktrace :refer [print-stack-trace]]
    [datastar.html :as html]
+   [datastar.examples.click-to-edit :as click-to-edit]
    [integrant.core :as ig]
    [malli.swagger]
    [muuntaja.core]
@@ -20,16 +22,33 @@
 (defmethod ig/halt-key! ::server [_ server-stop-fn]
   (server-stop-fn))
 
+(defn catch-exception [handler]
+  (fn [request]
+    (try
+      (prn "handling")
+      (handler request)
+      (catch Exception e
+        (prn "message " (.getMessage e))
+        (prn "stacktrace " (with-out-str (print-stack-trace e)))
+        {:status 500
+         :body {:error (.getMessage e)
+                :stacktrace (with-out-str (print-stack-trace e))}}))))
+
 (defmethod ig/init-key ::handler [_ opts]
   (ring/ring-handler
    (ring/router
-    [["/" {:get {:handler (fn [_] (html/render "index.html"))}}]
+    [["/" {:get {:handler (fn [_] (html/render "index.html" {}))}}]
+     ["/click-to-edit/"                  {:get {:handler click-to-edit/render}}]
+     ["/click-to-edit/contact/:id"       {:get {:handler click-to-edit/get-contact}}]
+     ["/click-to-edit/contact/:id/edit"  {:get {:handler click-to-edit/edit}}]
+     ["/click-to-edit/contact/:id/reset" {:get {:handler click-to-edit/reset}}]
      ["/*" {:get {:handler (html/template-handler)}}]]
     {:conflicts nil
      :exception pretty/exception
      :data {:coercion reitit.coercion.malli/coercion
             :muuntaja muuntaja.core/instance
-            :middleware [parameters/parameters-middleware
+            :middleware [catch-exception
+                         parameters/parameters-middleware
                          muuntaja/format-negotiate-middleware
                          muuntaja/format-response-middleware
                          exception/exception-middleware
