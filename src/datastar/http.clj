@@ -32,15 +32,21 @@
          :body {:error (.getMessage e)
                 :stacktrace (with-out-str (print-stack-trace e))}}))))
 
+(defn home [req]
+  (html/render "index.html"))
+
 (defmethod ig/init-key ::handler [_ opts]
   (ring/ring-handler
    (ring/router
-    [["/" {:get {:handler (fn [_] (html/render "index.html" {}))}}]
-     ["/click-to-edit/contact/:id"
-      ["/"      {:get {:handler click-to-edit/render}
-                 :put {:handler click-to-edit/edit}}]
-      ["/edit"  {:get {:handler click-to-edit/render-edit}}]
-      ["/reset" {:put {:handler click-to-edit/reset}}]]
+    [["/"       {:get {:handler home}}]
+
+     ["/click-to-edit"
+      ["/" {:get {:handler click-to-edit/render}}]
+      ["/contact/:id"
+       ["/"      {:get {:handler click-to-edit/render-index}
+                  :put {:handler click-to-edit/edit}}]
+       ["/edit"  {:get {:handler click-to-edit/render-edit}}]
+       ["/reset" {:put {:handler click-to-edit/reset}}]]]
      ["/*" {:get {:handler (html/template-handler)}}]]
     {:conflicts nil
      :exception pretty/exception
@@ -57,4 +63,5 @@
                          ring-coercion/coerce-response-middleware]}})
    (ring/routes
     (ring/redirect-trailing-slash-handler)
-    (ring/create-default-handler))))
+    (ring/create-resource-handler {:path "/"})
+    #_(ring/create-default-handler))))
