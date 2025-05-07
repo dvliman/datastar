@@ -1,9 +1,13 @@
 (ns datastar.html
   (:require
+   [charred.api :as charred]
    [clojure.string :as str]
    [clojure.java.io :as io]
    [ring.util.response :as response]
    [selmer.parser :as selmer]))
+
+(def ^:private bufSize 1024)
+(def read-json (charred/parse-json-fn {:async? false :bufsize bufSize}))
 
 (defn render [template-path data]
   (->

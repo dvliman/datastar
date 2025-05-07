@@ -25,11 +25,9 @@
 (defn catch-exception [handler]
   (fn [request]
     (try
-      (prn "handling")
       (handler request)
       (catch Exception e
-        (prn "message " (.getMessage e))
-        (prn "stacktrace " (with-out-str (print-stack-trace e)))
+        #d (with-out-str (print-stack-trace e))
         {:status 500
          :body {:error (.getMessage e)
                 :stacktrace (with-out-str (print-stack-trace e))}}))))
@@ -38,10 +36,11 @@
   (ring/ring-handler
    (ring/router
     [["/" {:get {:handler (fn [_] (html/render "index.html" {}))}}]
-     ["/click-to-edit/"                  {:get {:handler click-to-edit/render}}]
-     ["/click-to-edit/contact/:id"       {:get {:handler click-to-edit/get-contact}}]
-     ["/click-to-edit/contact/:id/edit"  {:get {:handler click-to-edit/edit}}]
-     ["/click-to-edit/contact/:id/reset" {:get {:handler click-to-edit/reset}}]
+     ["/click-to-edit/contact/:id"
+      ["/"      {:get {:handler click-to-edit/render}
+                 :put {:handler click-to-edit/edit}}]
+      ["/edit"  {:get {:handler click-to-edit/render-edit}}]
+      ["/reset" {:put {:handler click-to-edit/reset}}]]
      ["/*" {:get {:handler (html/template-handler)}}]]
     {:conflicts nil
      :exception pretty/exception
@@ -57,4 +56,5 @@
                          ring-coercion/coerce-request-middleware
                          ring-coercion/coerce-response-middleware]}})
    (ring/routes
+    (ring/redirect-trailing-slash-handler)
     (ring/create-default-handler))))

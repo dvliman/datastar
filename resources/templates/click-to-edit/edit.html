@@ -1,25 +1,22 @@
-<div id="contact_1" class="flex flex-col gap-2" data-signals={}>
-		<label class="flex items-center gap-2 input input-bordered">
+<div id="contact_1" data-signals={{ signals }}>
+		<label>
 			First Name
-			<input type="text" class="grow" data-bind="firstName"/>
+			<input type="text" data-bind="firstName"/>
 		</label>
-		<label class="flex items-center gap-2 input input-bordered">
+		<label>
 			Last Name
-			<input type="text" class="grow" data-bind="lastName"/>
+			<input type="text" data-bind="lastName"/>
 		</label>
-		<label class="flex items-center gap-2 input input-bordered">
+		<label>
 			Email
-			<input type="text" class="grow" data-bind="email"/>
+			<input type="text" data-bind="email"/>
 		</label>
-		<div class="flex gap-4">
-			<button
-				class="btn btn-primary"
-				data-on-click={}
-			>
+		<div >
+			<button data-on-click="@put('/click-to-edit/contact/1/')">
 				Save
 			</button>
-			<button class="btn btn-secondary" data-on-click="@get('/click-to-edit/contact/1')">
-				  Cancel
+			<button  data-on-click="@get('/click-to-edit/contact/1/')">
+				Cancel
 			</button>
 		</div>
 </div>
