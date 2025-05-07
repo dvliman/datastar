@@ -27,7 +27,7 @@
     (try
       (handler request)
       (catch Exception e
-        #d (with-out-str (print-stack-trace e))
+        (prn (with-out-str (print-stack-trace e)))
         {:status 500
          :body {:error (.getMessage e)
                 :stacktrace (with-out-str (print-stack-trace e))}}))))
@@ -39,29 +39,26 @@
   (ring/ring-handler
    (ring/router
     [["/"       {:get {:handler home}}]
-
      ["/click-to-edit"
       ["/" {:get {:handler click-to-edit/render}}]
       ["/contact/:id"
        ["/"      {:get {:handler click-to-edit/render-index}
                   :put {:handler click-to-edit/edit}}]
        ["/edit"  {:get {:handler click-to-edit/render-edit}}]
-       ["/reset" {:put {:handler click-to-edit/reset}}]]]
-     ["/*" {:get {:handler (html/template-handler)}}]]
+       ["/reset" {:put {:handler click-to-edit/reset}}]]]]
     {:conflicts nil
      :exception pretty/exception
      :data {:coercion reitit.coercion.malli/coercion
             :muuntaja muuntaja.core/instance
             :middleware [catch-exception
-                         parameters/parameters-middleware
                          muuntaja/format-negotiate-middleware
                          muuntaja/format-response-middleware
                          exception/exception-middleware
                          muuntaja/format-request-middleware
                          ring-coercion/coerce-exceptions-middleware
                          ring-coercion/coerce-request-middleware
-                         ring-coercion/coerce-response-middleware]}})
+                         ring-coercion/coerce-response-middleware
+                         parameters/parameters-middleware]}})
    (ring/routes
     (ring/redirect-trailing-slash-handler)
-    (ring/create-resource-handler {:path "/"})
-    #_(ring/create-default-handler))))
+    (ring/create-resource-handler {:path "/"}))))

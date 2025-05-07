@@ -2,4 +2,5 @@
   (:require
    [datastar.main]))
 
-(datastar.main/-main)
+(comment
+  (datastar.main/-main))
