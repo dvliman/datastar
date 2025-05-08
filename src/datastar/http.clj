@@ -1,11 +1,19 @@
 (ns datastar.http
   (:require
-   [datastar.html :as html]
+   [datastar.examples.bulk-update :as bulk-update]
    [datastar.examples.click-to-edit :as click-to-edit]
+   [datastar.html :as html]
    [integrant.core :as ig]
+   [muuntaja.core]
    [org.httpkit.server :as httpkit]
    [reitit.coercion.malli]
-   [reitit.ring :as ring]))
+   [reitit.dev.pretty :as pretty]
+   [reitit.ring :as ring]
+   [reitit.ring.coercion :as ring-coercion]
+   [reitit.ring.middleware.exception :as exception]
+   [reitit.ring.middleware.muuntaja :as muuntaja]
+   [reitit.ring.middleware.parameters :as parameters]
+   [selmer.parser]))
 
 (defmethod ig/init-key ::server [_ {:keys [handler] :as opts}]
   (httpkit/run-server handler (dissoc opts :handler)))
@@ -26,7 +34,21 @@
        ["/"      {:get {:handler click-to-edit/render-index}
                   :put {:handler click-to-edit/edit}}]
        ["/edit"  {:get {:handler click-to-edit/render-edit}}]
-       ["/reset" {:put {:handler click-to-edit/reset}}]]]])
+       ["/reset" {:put {:handler click-to-edit/reset}}]]]
+     ["/bulk-update"
+      ["/" {:get {:handler bulk-update/render}}]]]
+    {:conflicts nil
+     :exception pretty/exception
+     :data {:coercion reitit.coercion.malli/coercion
+            :muuntaja muuntaja.core/instance
+            :middleware [parameters/parameters-middleware
+                         muuntaja/format-negotiate-middleware
+                         muuntaja/format-response-middleware
+                         exception/exception-middleware
+                         muuntaja/format-request-middleware
+                         ring-coercion/coerce-exceptions-middleware
+                         ring-coercion/coerce-request-middleware
+                         ring-coercion/coerce-response-middleware]}})
    (ring/routes
     (ring/redirect-trailing-slash-handler)
     (ring/create-resource-handler {:path "/"}))))

@@ -1,0 +1,8 @@
+<tr id="{{ concat "contact_" contact.id }}">
+    <td>
+        <input class="checkbox" type="checkbox" data-bind={"selections." + {{ contact.id}}} />
+    </td>
+    <td>{{ contact.name }}</td>
+    <td>{{ contact.email }}</td>
+    <td>{% if contact.is-active %}Active{% else %}Inactive{% endif %}</td>
+</tr>

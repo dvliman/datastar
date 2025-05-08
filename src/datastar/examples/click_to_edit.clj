@@ -1,6 +1,5 @@
 (ns datastar.examples.click-to-edit
   (:require
-   [cheshire.core :as json]
    [datastar.html :as html]
    [starfederation.datastar.clojure.api :as d*]
    [starfederation.datastar.clojure.adapter.http-kit :refer [->sse-response on-open]]))
@@ -37,8 +36,7 @@
    {on-open
     (fn [sse]
       (d*/with-open-sse sse
-        (d*/merge-fragment! sse (html/fragment "click-to-edit/edit.html" {}
-                                               #_{:signals (cheshire.core/generate-string @state)}))))}))
+        (d*/merge-fragment! sse (html/fragment "click-to-edit/edit.html" {}))))}))
 
 (defn render-index [req]
   (->sse-response

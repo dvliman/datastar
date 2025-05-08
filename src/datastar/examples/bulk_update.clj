@@ -1,1 +1,30 @@
-(ns datastar.examples.bulk-update)
+(ns datastar.examples.bulk-update
+  (:require
+   [datastar.html :as html]
+   [starfederation.datastar.clojure.api :as d*]
+   [starfederation.datastar.clojure.adapter.http-kit :refer [->sse-response on-open]]))
+
+(def contacts
+  [{:id 0 :name "Joe Smith"       :email "joe@smith.org"       :is-active true}
+   {:id 1 :name "Angie MacDowell" :email "angie@macdowell.org" :is-active true}
+   {:id 2 :name "Fuqua Tarkenton" :email "fuqua@tarkenton.org" :is-active true}
+   {:id 3 :name "Kim Yee"         :email "kim@yee.org"         :is-active false}])
+
+(def state
+  (atom
+   {:selections
+    (->> contacts
+         (map (comp (partial str "contact_") :id))
+         (cons "all")
+         (map (fn [k] {k false}))
+         (into {}))}))
+
+(defn render [_]
+  (html/render
+   "bulk-update.html"
+   {:signals @state
+    :contacts contacts}))
+
+(defn activate [req])
+
+(defn deactivate [req])
