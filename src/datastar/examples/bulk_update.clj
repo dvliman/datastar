@@ -1,8 +1,7 @@
 (ns datastar.examples.bulk-update
   (:require
-   [datastar.html :as html]
-   [starfederation.datastar.clojure.api :as d*]
-   [starfederation.datastar.clojure.adapter.http-kit :refer [->sse-response on-open]]))
+   [cheshire.core :as json]
+   [datastar.html :as html]))
 
 (def contacts
   [{:id 0 :name "Joe Smith"       :email "joe@smith.org"       :is-active true}
@@ -19,12 +18,20 @@
          (map (fn [k] {k false}))
          (into {}))}))
 
+(defn with-key [{:keys [id] :as contact}]
+  (merge contact {:key (str "contact_" id)}))
+
 (defn render [_]
   (html/render
    "bulk-update.html"
-   {:signals @state
-    :contacts contacts}))
+   {:signals (json/generate-string @state)
+    :contacts (map with-key contacts)}))
 
-(defn activate [req])
+(defn activate [req]
+  (prn (:body-params req))
+  (prn (:query-params req))
+  (prn (:params req))
+  (html/merge-fragment! (html/fragment "bulk-update/contact-row.html" {})))
 
-(defn deactivate [req])
+(defn deactivate [req]
+  (html/merge-fragment! (html/fragment "bulk-update/contact-row.html" {})))

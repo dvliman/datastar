@@ -36,7 +36,9 @@
        ["/edit"  {:get {:handler click-to-edit/render-edit}}]
        ["/reset" {:put {:handler click-to-edit/reset}}]]]
      ["/bulk-update"
-      ["/" {:get {:handler bulk-update/render}}]]]
+      ["/"           {:get {:handler bulk-update/render}}]
+      ["/activate"   {:put {:handler bulk-update/activate}}]
+      ["/deactivate" {:put {:handler bulk-update/deactivate}}]]]
     {:conflicts nil
      :exception pretty/exception
      :data {:coercion reitit.coercion.malli/coercion

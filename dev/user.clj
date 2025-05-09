@@ -1,6 +1,4 @@
 (ns user
-  (:require
-   [datastar.main :as main]))
+  (:require [datastar.main :as main]))
 
-(comment
-  (datastar.main/-main))
+(datastar.main/-main)

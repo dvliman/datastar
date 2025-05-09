@@ -1,4 +1,4 @@
-{:paths   ["src" "dev"]
+{:paths   ["src" "dev" "resources"]
  :deps    {org.clojure/clojure {:mvn/version "1.11.1"}
            ring/ring-core {:mvn/version "1.11.0"}
            ring/ring-codec {:mvn/version "1.2.0"}

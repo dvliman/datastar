@@ -1,6 +1,7 @@
-<tr id="{{ concat "contact_" contact.id }}">
+{% debug contact %}
+<tr id="{{ contact.key }}">
     <td>
-        <input class="checkbox" type="checkbox" data-bind={"selections." + {{ contact.id}}} />
+        <input class="checkbox" type="checkbox" data-bind="" />
     </td>
     <td>{{ contact.name }}</td>
     <td>{{ contact.email }}</td>
