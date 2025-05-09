@@ -27,7 +27,8 @@
 (defmethod ig/init-key ::handler [_ _]
   (ring/ring-handler
    (ring/router
-    [["/"       {:get {:handler home}}]
+    [["/"        {:get {:handler home}}]
+
      ["/click-to-edit"
       ["/"       {:get {:handler click-to-edit/render}}]
       ["/contact/:id"
@@ -35,6 +36,7 @@
                   :put {:handler click-to-edit/edit}}]
        ["/edit"  {:get {:handler click-to-edit/render-edit}}]
        ["/reset" {:put {:handler click-to-edit/reset}}]]]
+
      ["/bulk-update"
       ["/"           {:get {:handler bulk-update/render}}]
       ["/activate"   {:put {:handler bulk-update/activate}}]
