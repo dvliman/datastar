@@ -1,4 +1,4 @@
-<div id="bulk_update" data-signals={{ signals|json|safe }}>
+<div id="bulk_update" data-signals={{ signals | json }}>
   <table>
     <caption>Select Rows And Activate Or Deactivate Below</caption>
     <thead>
@@ -21,10 +21,10 @@
     </tbody>
   </table>
   <div>
-    <button data-on-click="@put('bulk-update/activate'); $selections.all = false; @setAll('selections.contact_', $selections.all)">
+    <button data-on-click="@put('/bulk-update/activate'); $selections.all = false; @setAll('selections.contact_', $selections.all)">
       Activate
     </button>
-    <button data-on-click="@put('bulk-update/deactivate'); $selections.all = false; @setAll('selections.contact_', $selections.all)">
+    <button data-on-click="@put('/bulk-update/deactivate'); $selections.all = false; @setAll('selections.contact_', $selections.all)">
       Deactivate
     </button>
   </div>

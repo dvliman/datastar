@@ -19,7 +19,7 @@
          (into {}))}))
 
 (defn with-key [{:keys [id] :as contact}]
-  (merge contact {:key (str "contact_" id)}))
+  (assoc contact :key (str "contact_" id)))
 
 (defn render [_]
   (html/render
@@ -28,10 +28,15 @@
     :contacts (map with-key contacts)}))
 
 (defn activate [req]
+  (prn "activate")
   (prn (:body-params req))
   (prn (:query-params req))
   (prn (:params req))
   (html/merge-fragment! (html/fragment "bulk-update/contact-row.html" {})))
 
 (defn deactivate [req]
+  (prn "deactivate")
+  (prn (:body-params req))
+  (prn (:query-params req))
+  (prn (:params req))
   (html/merge-fragment! (html/fragment "bulk-update/contact-row.html" {})))

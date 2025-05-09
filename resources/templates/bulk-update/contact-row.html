@@ -1,7 +1,6 @@
-{% debug contact %}
 <tr id="{{ contact.key }}">
     <td>
-        <input class="checkbox" type="checkbox" data-bind="" />
+        <input class="checkbox" type="checkbox" data-bind="selections.{{ contact.key }}" />
     </td>
     <td>{{ contact.name }}</td>
     <td>{{ contact.email }}</td>
