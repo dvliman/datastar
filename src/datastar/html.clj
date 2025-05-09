@@ -2,7 +2,9 @@
   (:require
    [charred.api :as charred]
    [ring.util.response :as response]
-   [selmer.parser :as selmer]))
+   [selmer.parser :as selmer]
+   [starfederation.datastar.clojure.api :as d*]
+   [starfederation.datastar.clojure.adapter.http-kit :refer [->sse-response on-open]]))
 
 (def ^:private bufSize 1024)
 (def read-json (charred/parse-json-fn {:async? false :bufsize bufSize}))
@@ -25,3 +27,11 @@
    (->
     (str "templates/" template-path)
     (selmer/render-file data))))
+
+(defmacro merge-fragment! [req & body]
+  `(->sse-response
+    ~req
+    {on-open
+     (fn [sse#]
+       (d*/with-open-sse sse#
+         (d*/merge-fragment! sse# ~@body)))}))

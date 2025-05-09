@@ -15,6 +15,7 @@
       </tr>
     </thead>
     <tbody>
+      {% debug contacts %}
       {% for contact in contacts %}
       {% include "templates/bulk-update/contact-row.html" with contact=contact %}
       {% endfor %}
