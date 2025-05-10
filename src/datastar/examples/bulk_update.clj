@@ -1,7 +1,9 @@
 (ns datastar.examples.bulk-update
   (:require
    [clojure.string :as str]
-   [datastar.html :as html]))
+   [datastar.html :as html]
+   [starfederation.datastar.clojure.api :as d*]
+   [starfederation.datastar.clojure.adapter.http-kit :refer [->sse-response on-open]]))
 
 (def contacts
   [{:id 0 :name "Joe Smith"       :email "joe@smith.org"       :is-active true}
@@ -34,28 +36,27 @@
   (parse-long (second (re-find #"contact_(\d+)" (name s)))))
 
 (defn activation [selections is-active]
-  (for [[select selected?] selections]
-    (when (contact? select)
-      (let [contact (nth contacts (contact-id select))
-            changed? (not (= (:is-active contact) is-active))]
-        (when (and selected? changed?)
-          (update-in contacts [(contact-id select) :is-active] (constantly is-active)))))))
+  (map with-key
+       (reduce (fn [acc [select selected?]]
+                 (if (contact? select)
+                   (let [contact (nth acc (contact-id select))
+                         changed? (not (= (:is-active contact) is-active))]
+                     (if (and selected? changed?)
+                       (update-in acc [(contact-id select) :is-active] (constantly is-active))
+                       acc))
+                   acc))
+               contacts
+               selections)))
 
-(identity contacts)
-(activation {:contact_2 false
-             :contact_3 true} true)
-(defn activate [req]
-  (activation req true))
-
-(defn deactivate [req]
-  (activation req false))
-
-(macroexpand
- '(html/merge-fragment!
+(defn activate [{:keys [body-params] :as req}]
+  (html/merge-fragment!
    req
-   (html/fragment
-    "bulk-update/contact-row.html"
-    {:contact (update contact :is-active (constantly is-active))})
-   (html/fragment
-    "bulk-update/contact-row.html"
-    {:contact (update contact :is-active (constantly is-active))})))
+   (for [contact (activation body-params true)]
+     (html/fragment "bulk-update/contact-row.html" {:contact (with-key contact)}))))
+
+(defn deactivate [{:keys [body-params] :as req}]
+  (->sse-response
+   req
+   {on-open
+    (fn [sse]
+      (d*/with-open-sse sse))}))
