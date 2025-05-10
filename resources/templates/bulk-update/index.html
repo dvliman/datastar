@@ -1,4 +1,4 @@
-<div id="bulk_update" data-signals="{{signals|json}}">
+<div id="bulk_update" data-signals={{signals|json|safe}}>
   <table>
     <caption>Select Rows And Activate Or Deactivate Below</caption>
     <thead>
@@ -7,7 +7,7 @@
           <input class="checkbox"
                  type="checkbox"
                  data-bind="selections.all"
-                 data-on-change="@setAll('selections.contact_', $selections.all)">
+                 data-on-change="@setAll('selections.contact_*', $selections.all)">
         <th>Name</th>
         <th>Email</th>
         <th>Status</th>

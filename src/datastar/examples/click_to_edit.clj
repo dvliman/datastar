@@ -17,9 +17,7 @@
 
 (defn edit [req]
   (let [signals (-> req :body-params)]
-    (swap! state merge signals)
-    (html/merge-fragment! req (html/fragment "click-to-edit/index.html" @state))))
+    (html/merge-fragment! req (html/fragment "click-to-edit/index.html" (swap! state merge signals)))))
 
 (defn reset [req]
-  (reset! state {})
-  (html/merge-fragment! req (html/fragment "click-to-edit/index.html" @state)))
+  (html/merge-fragment! req (html/fragment "click-to-edit/index.html" (reset! state {}))))
