@@ -49,14 +49,15 @@
                selections)))
 
 (defn activate [{:keys [body-params] :as req}]
-  (html/merge-fragment!
+  (html/merge-fragments!
    req
-   (for [contact (activation body-params true)]
-     (html/fragment "bulk-update/contact-row.html" {:contact (with-key contact)}))))
+   (map (fn [contact]
+          (html/fragment "bulk-update/contact-row.html" {:contact contact}))
+        (activation (:selections body-params) true))))
 
 (defn deactivate [{:keys [body-params] :as req}]
-  (->sse-response
+  (html/merge-fragments!
    req
-   {on-open
-    (fn [sse]
-      (d*/with-open-sse sse))}))
+   (map (fn [contact]
+          (html/fragment "bulk-update/contact-row.html" {:contact contact}))
+        (activation (:selections body-params) false))))

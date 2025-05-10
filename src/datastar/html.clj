@@ -31,3 +31,11 @@
      (fn [sse#]
        (d*/with-open-sse sse#
          (d*/merge-fragment! sse# ~@body)))}))
+
+(defmacro merge-fragments! [req & body]
+  `(->sse-response
+    ~req
+    {on-open
+     (fn [sse#]
+       (d*/with-open-sse sse#
+         (d*/merge-fragments! sse# ~@body)))}))
