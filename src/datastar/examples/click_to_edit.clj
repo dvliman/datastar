@@ -1,12 +1,11 @@
 (ns datastar.examples.click-to-edit
-  (:require
-   [datastar.html :as html]))
+  (:require [datastar.html :as html]))
 
 (def state (atom {:firstName "John"
                   :lastName "Doe"
                   :email "joe@blow.com"}))
 
-(defn render [req]
+(defn render [_]
   (html/render "click-to-edit.html" @state))
 
 (defn render-edit [req]

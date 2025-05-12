@@ -1,0 +1,19 @@
+<div id="click-to-load" data-signals={{signals|json|safe}}>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>ID</th>
+      </tr>
+    </thead>
+    <tbody id="click-to-load-rows" data-signals={{signals|json|safe}}>
+      {% for agent in agents %}
+      {% include "templates/click-to-load/agent-row.html" with agent=agent index=loop.index0 %}
+      {% endfor %}
+    </tbody>
+  </table>
+  <button id="more-button" data-on-click="console.log('click to load more');$offset={{ limit-plus-offset }}; $limit={{ limit }};@get('/click-to-load/more')">
+    Load More
+  </button>
+</div>

@@ -2,6 +2,7 @@
   (:require
    [datastar.examples.bulk-update :as bulk-update]
    [datastar.examples.click-to-edit :as click-to-edit]
+   [datastar.examples.click-to-load :as click-to-load]
    [datastar.html :as html]
    [integrant.core :as ig]
    [muuntaja.core]
@@ -40,7 +41,11 @@
      ["/bulk-update"
       ["/"           {:get {:handler bulk-update/render}}]
       ["/activate"   {:put {:handler bulk-update/activate}}]
-      ["/deactivate" {:put {:handler bulk-update/deactivate}}]]]
+      ["/deactivate" {:put {:handler bulk-update/deactivate}}]]
+
+     ["/click-to-load"
+      ["/"      {:get {:handler click-to-load/render}}]
+      ["/more"  {:get {:handler click-to-load/more}}]]]
     {:conflicts nil
      :exception pretty/exception
      :data {:coercion reitit.coercion.malli/coercion

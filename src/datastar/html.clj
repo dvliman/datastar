@@ -1,5 +1,7 @@
 (ns datastar.html
   (:require
+   [cheshire.core :as json]
+   [clojure.walk :as walk]
    [ring.util.response :as response]
    [selmer.parser :as selmer]
    [starfederation.datastar.clojure.api :as d*]
@@ -28,14 +30,20 @@
   `(->sse-response
     ~req
     {on-open
-     (fn [sse#]
-       (d*/with-open-sse sse#
-         (d*/merge-fragment! sse# ~@body)))}))
+     (fn [sse-gen#]
+       (d*/with-open-sse sse-gen#
+         (d*/merge-fragment! sse-gen# ~@body)))}))
 
 (defmacro merge-fragments! [req & body]
   `(->sse-response
     ~req
     {on-open
-     (fn [sse#]
-       (d*/with-open-sse sse#
-         (d*/merge-fragments! sse# ~@body)))}))
+     (fn [sse-gen#]
+       (d*/with-open-sse sse-gen#
+         (d*/merge-fragments! sse-gen# ~@body)))}))
+
+(defn get-signals [req]
+  (-> req
+      d*/get-signals
+      json/decode
+      walk/keywordize-keys))
