@@ -13,24 +13,28 @@
         long-val (.getLong buffer)]
     (bit-and long-val 0x7fffffffffffffff)))
 
+(defn make-agent [i]
+  {:id (str "agent_" i)
+   :email (format "void%d@null.org" (inc i))
+   :alias-hash (alias-hash (format "%s" (inc 1)))})
+
 (defn render [req]
   (html/render
    "click-to-load.html"
    {:signals {:limit 10 :offset 0}
-    :limit 10
-    :offset 0
     :limit-plus-offset (+ 10 0)}))
 
+(defn cap [limit]
+  (if (> limit 100)
+    100
+    limit))
+
 (defn more [req]
-  (let [{:keys [limit offset] :or {limit 10 offset 0}}
-        (html/get-signals req)]
-    (if (zero? offset)
-      (html/merge-fragment!
-       req
-       (html/fragment "click-to-load/index.html" {:agents []}))
-      (->sse-response
-        req
-        {on-open
-         (fn [sse-gen]
-           (d*/with-open-sse sse-gen
-             #_(d*/merge-fragment! sse-gen )))}))))
+  (let [{:keys [limit offset] :or {limit 10 offset 0}} (html/get-signals req)
+        limit (cap limit)]
+    (html/merge-fragment!
+     req
+     (html/fragment
+      "click-to-load/agent-row.html"
+      {:signals {:limit limit :offset (+ limit offset)}
+       :agents (map make-agent (range offset limit))}))))

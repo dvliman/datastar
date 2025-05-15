@@ -3,6 +3,7 @@
    [datastar.examples.bulk-update :as bulk-update]
    [datastar.examples.click-to-edit :as click-to-edit]
    [datastar.examples.click-to-load :as click-to-load]
+   [datastar.examples.delete-row :as delete-row]
    [datastar.html :as html]
    [integrant.core :as ig]
    [muuntaja.core]
@@ -45,7 +46,11 @@
 
      ["/click-to-load"
       ["/"      {:get {:handler click-to-load/render}}]
-      ["/more"  {:get {:handler click-to-load/more}}]]]
+      ["/more"  {:get {:handler click-to-load/more}}]]
+
+     ["/delete-row"
+      ["/"      {:get {:handler delete-row/delete-row-contacts}}]
+      ["/reset" {:get {:handler delete-row/delete-row-contact}}]]]
     {:conflicts nil
      :exception pretty/exception
      :data {:coercion reitit.coercion.malli/coercion

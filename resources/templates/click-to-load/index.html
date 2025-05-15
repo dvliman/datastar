@@ -9,11 +9,11 @@
     </thead>
     <tbody id="click-to-load-rows" data-signals={{signals|json|safe}}>
       {% for agent in agents %}
-      {% include "templates/click-to-load/agent-row.html" with agent=agent index=loop.index0 %}
+      {% include "templates/click-to-load/agent-row.html" with agent=agent i=$input + $offset %}
       {% endfor %}
     </tbody>
   </table>
-  <button id="more-button" data-on-click="console.log('click to load more');$offset={{ limit-plus-offset }}; $limit={{ limit }};@get('/click-to-load/more')">
+  <button id="more-button" data-on-click="console.log('click to load more');$offset={{ signals.offset }}; $limit={{ signals.limit }};@get('/click-to-load/more')">
     Load More
   </button>
 </div>
