@@ -9,17 +9,6 @@
    [starfederation.datastar.clojure.api :as d*]
    [starfederation.datastar.clojure.adapter.http-kit :refer [->sse-response on-open]]))
 
-(defn render
-  ([template-path]
-   (render template-path {}))
-  ([template-path data]
-   (->
-    (str "templates/" template-path)
-    (selmer/render-file data)
-    (response/response)
-    (response/content-type "text/html")
-    (response/charset "UTF-8"))))
-
 (defn response [data]
   (->
     data
@@ -35,6 +24,12 @@
     (str "templates/" template-path)
     (selmer/render-file data))))
 
+(defn render
+  ([template-path]
+   (render template-path {}))
+  ([template-path data]
+   (response (fragment template-path data))))
+
 (defmacro merge-fragment! [req & body]
   `(->sse-response
     ~req
@@ -45,7 +40,7 @@
 
 (defmacro merge-fragments! [req & body]
   `(->sse-response
-    ~req
+      ~req
     {on-open
      (fn [sse-gen#]
        (d*/with-open-sse sse-gen#
@@ -58,11 +53,17 @@
       walk/keywordize-keys))
 
 (defn page [body]
-  (hc/compile
-   [[h/doctype-html5]
-    [:html
-     [:head
-      [:meta {:charset "UTF-8"}]
-      [:script {:type "module" :src "https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.0-beta.11/bundles/datastar.js"}]
-      [:link {:ref "stylesheet" :href "https://matcha.mizu.sh/matcha.css"}]]
-     [:body body]]]))
+  (h/html
+   (hc/compile
+    [[h/doctype-html5]
+     [:html
+      [:head
+       [:meta {:charset "UTF-8"}]
+       [:title "datastar"]
+       [:meta {:name "description", :content ""}]
+       [:meta {:name "viewport", :content "width=device-width, initial-scale=1"}]
+       [:script {:type "module" :src "https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.0-beta.11/bundles/datastar.js"}]
+       [:link {:ref "stylesheet" :href "https://matcha.mizu.sh/matcha.css"}]]
+      [:body
+       [:a {:href "/"} "Home"]
+       body]]])))

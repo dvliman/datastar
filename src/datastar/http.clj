@@ -9,7 +9,7 @@
    [muuntaja.core]
    [org.httpkit.server :as httpkit]
    [reitit.coercion.malli]
-   [reitit.dev.pretty :as pretty]
+   [ring.util.response :as response]
    [reitit.ring :as ring]
    [reitit.ring.coercion :as ring-coercion]
    [reitit.ring.middleware.exception :as exception]
@@ -51,11 +51,15 @@
      ["/delete-row"
       ["/"      {:get {:handler delete-row/delete-row-contacts}}]
       ["/reset" {:get {:handler delete-row/delete-row-contact}}]]]
-    {:conflicts nil
-     :exception pretty/exception
-     :data {:coercion reitit.coercion.malli/coercion
-            :muuntaja muuntaja.core/instance
-            :middleware [parameters/parameters-middleware
+    {:data {:middleware [(fn [handler]
+                           (fn [request]
+                             (try
+                               (handler request)
+                               (catch Exception e
+                                 (prn (.getMessage e))
+                                 #d e
+                                  (response/response {:exception (.getMessage e)})))))
+                         parameters/parameters-middleware
                          muuntaja/format-negotiate-middleware
                          muuntaja/format-response-middleware
                          exception/exception-middleware
