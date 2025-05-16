@@ -1,7 +1,9 @@
 (ns datastar.examples.delete-row
   (:require
    [datastar.html :as html]
-   [dev.onionpancakes.chassis.core :as h]))
+   [dev.onionpancakes.chassis.core :as h]
+   [starfederation.datastar.clojure.api :as d*]
+   [starfederation.datastar.clojure.adapter.http-kit :refer [->sse-response on-open]]))
 
 (def contacts
   [{:id 0 :name "Joe Smith"       :email "joe@smith.org"       :is-active true}
@@ -9,30 +11,53 @@
    {:id 2 :name "Fuqua Tarkenton" :email "fuqua@tarkenton.org" :is-active true}
    {:id 3 :name "Kim Yee"         :email "kim@yee.org"         :is-active false}])
 
-(defn delete-row-contact [contact]
+(def state (atom contacts))
+
+(defn delete-row [contact]
   [:tr {:id (str "contact_" (:id contact))}
    [:td (:name contact)]
    [:td (:email contact)]
    [:td (if (:is-active contact) "Active" "Inactive")]
    [:td
-    [:button {:data-on-click (h/raw (format "confirm('are you sure?') && @delete('delete-row/data/%s')" (:id contact)))}
+    [:button {:data-on-click (h/raw (format "confirm('are you sure?') && @delete('/delete-row/delete/%s')" (:id contact)))}
      "Delete"]]])
 
-(defn delete-row-contacts [_req]
-  (->
-   [:div.delete-row
-    [:table
-     [:thead
-      [:tr
-       [:td "Name"]
-       [:td "Email"]
-       [:td "Status"]
-       [:td "Actions"]]]
-     [:tbody
-      (for [contact contacts]
-        (delete-row-contact contact))]]
-    [:div
-     [:button {:data-on-click (h/raw "@get('/delete-row/reset')")}
-      "Reset"]]]
-   html/page
-   html/response))
+(defn fragment[]
+  [:div.delete-row
+   [:table
+    [:thead
+     [:tr
+      [:td "Name"]
+      [:td "Email"]
+      [:td "Status"]
+      [:td "Actions"]]]
+    [:tbody
+     (for [contact @state]
+       (delete-row contact))]]
+   [:div
+    [:button {:data-on-click (h/raw "@get('/delete-row/reset')")}
+     "Reset"]]])
+
+(defn render [_]
+  (html/response (html/page (fragment))))
+
+(defn delete [req]
+  (let [id (-> req :path-params :id parse-long)]
+    (swap! state (partial filter (fn [x]
+                                   (not= id (:id x)))))
+    (->sse-response
+     req
+     {on-open
+      (fn [sse-gen]
+        (d*/with-open-sse sse-gen
+          (d*/remove-fragment! sse-gen (str "contact_" id))
+          (d*/redirect! sse-gen "/delete-row")))})))
+
+(defn reset [req]
+  (reset! state contacts)
+  (->sse-response
+   req
+   {on-open
+    (fn [sse-gen]
+      (d*/with-open-sse sse-gen
+        (d*/merge-fragment! sse-gen (fragment))))}))

@@ -9,12 +9,12 @@
    [muuntaja.core]
    [org.httpkit.server :as httpkit]
    [reitit.coercion.malli]
-   [ring.util.response :as response]
    [reitit.ring :as ring]
    [reitit.ring.coercion :as ring-coercion]
    [reitit.ring.middleware.exception :as exception]
    [reitit.ring.middleware.muuntaja :as muuntaja]
    [reitit.ring.middleware.parameters :as parameters]
+   [ring.util.response :as response]
    [selmer.parser]))
 
 (defmethod ig/init-key ::server [_ {:keys [handler] :as opts}]
@@ -49,16 +49,16 @@
       ["/more"  {:get {:handler click-to-load/more}}]]
 
      ["/delete-row"
-      ["/"      {:get {:handler delete-row/delete-row-contacts}}]
-      ["/reset" {:get {:handler delete-row/delete-row-contact}}]]]
+      ["/"            {:get    {:handler delete-row/render}}]
+      ["/delete/:id"  {:delete {:handler delete-row/delete}}]
+      ["/reset"       {:get    {:handler delete-row/reset}}]]]
     {:data {:middleware [(fn [handler]
                            (fn [request]
                              (try
                                (handler request)
                                (catch Exception e
                                  (prn (.getMessage e))
-                                 #d e
-                                  (response/response {:exception (.getMessage e)})))))
+                                 (response/response {:exception (.getMessage e)})))))
                          parameters/parameters-middleware
                          muuntaja/format-negotiate-middleware
                          muuntaja/format-response-middleware

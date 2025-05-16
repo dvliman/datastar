@@ -63,7 +63,7 @@
        [:meta {:name "description", :content ""}]
        [:meta {:name "viewport", :content "width=device-width, initial-scale=1"}]
        [:script {:type "module" :src "https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.0-beta.11/bundles/datastar.js"}]
-       [:link {:ref "stylesheet" :href "https://matcha.mizu.sh/matcha.css"}]]
+       [:link {:rel "stylesheet" :href "https://matcha.mizu.sh/matcha.css"}]]
       [:body
        [:a {:href "/"} "Home"]
        body]]])))
