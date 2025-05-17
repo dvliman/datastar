@@ -20,6 +20,13 @@
    [:td (format "void%d@null.org" (inc i))]
    [:td (alias-hash (format "%s" (inc 1)))]])
 
+(defn more-button [offset limit]
+  [:button {:id "more"
+            :data-on-click
+            (h/raw (format "$offset=%d;$limit=%d;@get('/click-to-load/more')"
+                           (+ offset limit) limit))}
+   "Load More"])
+
 (def state
   (atom {:offset 0 :limit 10}))
 
@@ -35,12 +42,7 @@
      [:tbody#click-to-load-rows {:data-signals (html/json @state)}
       (for [i (range (:limit @state))]
         (agent-row i))]]
-    [:button {:id "more"
-              :data-on-click
-              (h/raw (format "$offset=%d;$limit=%d;@get('/click-to-load/more')"
-                             (+ (:offset @state)
-                                (:limit @state)) (:limit @state)))}
-     "Load More"]]
+    (more-button (:offset @state) (:limit @state))]
    html/page
    html/response))
 
@@ -50,13 +52,14 @@
     limit))
 
 (defn more [req]
-  (let [{:keys [limit offset] :or {limit 10 offset 0}} (html/get-signals req)
-        limit (cap limit)]
-    (swap! state merge {:limit limit :offset offset})
+  (let [{:keys [limit offset] :or {limit 10 offset 0}} (html/get-signals req)]
+    (swap! state merge {:limit (cap limit) :offset offset})
     (->sse-response
      req
      {on-open
       (fn [sse]
-        (for [i (map (partial + (:offset @state)) (range (:limit @state)))]
-          (d*/merge-fragment! sse (h/html (agent-row i)) {d*/selector "#click-to-load-rows"
-                                                          d*/merge-mode d*/mm-append})))})))
+        (let [{:keys [offset limit]} @state]
+          (d*/merge-fragment! sse (h/html (more-button offset limit)))
+          (for [i (map (partial + offset) (range limit))]
+            (d*/merge-fragment! sse (h/html (agent-row (inc i))) {d*/selector "#click-to-load-rows"
+                                                                  d*/merge-mode d*/mm-append}))))})))

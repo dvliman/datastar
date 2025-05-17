@@ -24,10 +24,10 @@
 (defn home [_]
   (->
    [:ul
-    [:li [:a {:href "/click-to-edit"} "Click to Edit"]]
-    [:li [:a {:href "/bulk-update"} "Bulk Update"]]
-    [:li [:a {:href "/click-to-load"} "Click to Load"]]
-    [:li [:a {:href "/delete-row"} "Delete Row"]]]
+    [:li [:a {:href "/click-to-edit/"} "Click to Edit"]]
+    [:li [:a {:href "/bulk-update/"} "Bulk Update"]]
+    [:li [:a {:href "/click-to-load/"} "Click to Load"]]
+    [:li [:a {:href "/delete-row/"} "Delete Row"]]]
    html/page
    html/response))
 
