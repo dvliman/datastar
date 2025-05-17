@@ -46,14 +46,6 @@
        (d*/with-open-sse sse-gen#
          (d*/merge-fragments! sse-gen# ~@body)))}))
 
-(defmacro sse-response [req sse-gen & body]
-  `(->sse-response
-    ~req
-    {on-open
-     (fn [~sse-gen]
-       (d*/with-open-sse ~sse-gen
-         ~@body))}))
-
 (defn get-signals [req]
   (-> req
       d*/get-signals

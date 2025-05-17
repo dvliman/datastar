@@ -2,6 +2,7 @@
   (:require
    [clojure.string :as str]
    [datastar.html :as html]
+   [dev.onionpancakes.chassis.core :as h]
    [starfederation.datastar.clojure.api :as d*]
    [starfederation.datastar.clojure.adapter.http-kit :refer [->sse-response on-open]]))
 
@@ -20,14 +21,37 @@
          (map (fn [k] {k false}))
          (into {}))}))
 
-(defn with-key [{:keys [id] :as contact}]
-  (assoc contact :key (str "contact_" id)))
+(defn contact-row [contact]
+  [:tr {:id (str "contact_" (:id contact))}
+   [:td [:input {:class "checkbox" :type "checkbox" :data-bind (str "selections.contact_" (:id contact))}]]
+   [:td (:name contact)]
+   [:td (:email contact)]
+   [:td (if (:is-active contact) "Active" "Inactive")]])
 
 (defn render [_]
-  (html/render
-   "bulk-update.html"
-   {:signals @state
-    :contacts (map with-key contacts)}))
+  (->
+   [:div#bulk-update {:data-signals (html/json @state)}
+    [:table
+     [:caption "Select row and activate or deactivate below"]
+     [:thead
+      [:tr
+       [:th
+        [:input
+         {:class "checkbox"
+          :type "checkbox"
+          :data-bind "selections.all"
+          :data-on-change "@setAll('selections.contact_*', $selections.all)"}]]
+       [:th "Name"]
+       [:th "Email"]
+       [:th "Status"]]]
+     [:tbody
+      (for [contact contacts]
+        (contact-row contact))]]
+    [:div
+     [:button {:data-on-click (h/raw "@put('/bulk-update/activate'); $selections.all = false; @setAll('selections.contact_', $selections.all)")} "Activate"]
+     [:button {:data-on-click (h/raw "@put('/bulk-update/deactivate'); $selections.all = false; @setAll('selections.contact_', $selections.all)")} "Deactivate"]]]
+   html/page
+   html/response))
 
 (defn contact? [c]
   (str/starts-with? (name c) "contact_"))
@@ -36,28 +60,31 @@
   (parse-long (second (re-find #"contact_(\d+)" (name s)))))
 
 (defn activation [selections is-active]
-  (map with-key
-       (reduce (fn [acc [select selected?]]
-                 (if (contact? select)
-                   (let [contact (nth acc (contact-id select))
-                         changed? (not (= (:is-active contact) is-active))]
-                     (if (and selected? changed?)
-                       (update-in acc [(contact-id select) :is-active] (constantly is-active))
-                       acc))
-                   acc))
-               contacts
-               selections)))
+  (reduce (fn [acc [select selected?]]
+            (if (contact? select)
+              (let [contact (nth acc (contact-id select))
+                    changed? (not (= (:is-active contact) is-active))]
+                (if (and selected? changed?)
+                  (update-in acc [(contact-id select) :is-active] (constantly is-active))
+                  acc))
+              acc))
+          contacts
+          selections))
 
 (defn activate [{:keys [body-params] :as req}]
-  (html/merge-fragments!
+  (->sse-response
    req
-   (map (fn [contact]
-          (html/fragment "bulk-update/contact-row.html" {:contact contact}))
-        (activation (:selections body-params) true))))
+   {on-open
+    (fn [sse]
+      (d*/merge-fragments!
+       sse
+       (map (comp h/html contact-row) (activation (:selections body-params) true))))}))
 
 (defn deactivate [{:keys [body-params] :as req}]
-  (html/merge-fragments!
+  (->sse-response
    req
-   (map (fn [contact]
-          (html/fragment "bulk-update/contact-row.html" {:contact contact}))
-        (activation (:selections body-params) false))))
+   {on-open
+    (fn [sse]
+      (d*/merge-fragments!
+       sse
+       (map (comp h/html contact-row) (activation (:selections body-params) false))))}))

@@ -24,14 +24,14 @@
 (defn render [_]
   (html/response (html/page (view))))
 
-(defn render-index [req]
+(defn fragment [req]
   (->sse-response
    req
    {on-open
     (fn [sse]
       (d*/merge-fragment! sse (h/html (view))))}))
 
-(defn render-edit [req]
+(defn editing [req]
   (->sse-response
    req
    {on-open
@@ -39,8 +39,7 @@
       (d*/merge-fragment!
        sse
        (h/html
-        [:div#contact_1
-         {:id "contact_1" :data-signals (html/json @state)}
+        [:div {:id "contact_1" :data-signals (html/json @state)}
          [:label "First Name" [:input {:type "text" :data-bind "firstName"}]]
          [:label "Last Name" [:input {:type "text" :data-bind "lastName"}]]
          [:label "Email" [:input {:type "text" :data-bind "email"}]]
@@ -49,11 +48,10 @@
           [:button {:data-on-click (h/raw "@get('/click-to-edit/contact/1/')")} "Cancel"]]])))}))
 
 (defn edit [req]
-  #d req
   (let [signals (-> req :body-params)]
     (swap! state merge signals)
-    (render-index req)))
+    (fragment req)))
 
 (defn reset [req]
   (reset! state {})
-  (render-index req))
+  (fragment req))

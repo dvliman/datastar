@@ -6,16 +6,14 @@
    [datastar.examples.delete-row :as delete-row]
    [datastar.html :as html]
    [integrant.core :as ig]
-   [muuntaja.core]
+   [muuntaja.core :as m]
    [org.httpkit.server :as httpkit]
    [reitit.coercion.malli]
    [reitit.ring :as ring]
    [reitit.ring.coercion :as ring-coercion]
    [reitit.ring.middleware.exception :as exception]
    [reitit.ring.middleware.muuntaja :as muuntaja]
-   [reitit.ring.middleware.parameters :as parameters]
-   [ring.util.response :as response]
-   [selmer.parser]))
+   [reitit.ring.middleware.parameters :as parameters]))
 
 (defmethod ig/init-key ::server [_ {:keys [handler] :as opts}]
   (httpkit/run-server handler (dissoc opts :handler)))
@@ -43,7 +41,7 @@
       ["/contact/:id"
        ["/"      {:get {:handler click-to-edit/render-index}
                   :put {:handler click-to-edit/edit}}]
-       ["/edit"  {:get {:handler click-to-edit/render-edit}}]
+       ["/edit"  {:get {:handler click-to-edit/editing}}]
        ["/reset" {:put {:handler click-to-edit/reset}}]]]
 
      ["/bulk-update"
@@ -59,14 +57,8 @@
       ["/"            {:get    {:handler delete-row/render}}]
       ["/delete/:id"  {:delete {:handler delete-row/delete}}]
       ["/reset"       {:get    {:handler delete-row/reset}}]]]
-    {:data {:middleware [(fn [handler]
-                           (fn [request]
-                             (try
-                               (handler request)
-                               (catch Exception e
-                                 (prn (.getMessage e))
-                                 (response/response {:exception (.getMessage e)})))))
-                         parameters/parameters-middleware
+    {:data {:muuntaja m/instance
+            :middleware [parameters/parameters-middleware
                          muuntaja/format-negotiate-middleware
                          muuntaja/format-response-middleware
                          exception/exception-middleware
