@@ -57,9 +57,6 @@
      req
      {on-open
       (fn [sse]
-        (d*/merge-fragments!
-         sse
-         (for [i (map (partial + (:offset @state)) (range (:limit @state)))]
-           (h/html (agent-row i)))
-         {d*/selector "click-to-load-rows"
-          d*/merge-mode d*/mm-append}))})))
+        (for [i (map (partial + (:offset @state)) (range (:limit @state)))]
+          (d*/merge-fragment! sse (h/html (agent-row i)) {d*/selector "#click-to-load-rows"
+                                                          d*/merge-mode d*/mm-append})))})))
