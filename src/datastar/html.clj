@@ -3,11 +3,9 @@
    [cheshire.core :as json]
    [clojure.walk :as walk]
    [ring.util.response :as response]
-   [selmer.parser :as selmer]
    [dev.onionpancakes.chassis.core :as h]
    [dev.onionpancakes.chassis.compiler :as hc]
-   [starfederation.datastar.clojure.api :as d*]
-   [starfederation.datastar.clojure.adapter.http-kit :refer [->sse-response on-open]]))
+   [starfederation.datastar.clojure.api :as d*]))
 
 (defn response [data]
   (->
@@ -15,36 +13,6 @@
     (response/response)
     (response/content-type "text/html")
     (response/charset "UTF-8")))
-
-(defn fragment
-  ([template-path]
-   (fragment template-path {}))
-  ([template-path data]
-   (->
-    (str "templates/" template-path)
-    (selmer/render-file data))))
-
-(defn render
-  ([template-path]
-   (render template-path {}))
-  ([template-path data]
-   (response (fragment template-path data))))
-
-(defmacro merge-fragment! [req & body]
-  `(->sse-response
-    ~req
-    {on-open
-     (fn [sse-gen#]
-       (d*/with-open-sse sse-gen#
-         (d*/merge-fragment! sse-gen# ~@body)))}))
-
-(defmacro merge-fragments! [req & body]
-  `(->sse-response
-    ~req
-    {on-open
-     (fn [sse-gen#]
-       (d*/with-open-sse sse-gen#
-         (d*/merge-fragments! sse-gen# ~@body)))}))
 
 (defn get-signals [req]
   (-> req

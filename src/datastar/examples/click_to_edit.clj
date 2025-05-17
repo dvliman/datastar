@@ -13,7 +13,7 @@
 
 (defn view []
   (let [{:keys [firstName lastName email]} @state]
-    [:div#contact_1
+    [:div#contact_1.david
      [:label "First Name: " firstName]
      [:label "Last Name: " lastName]
      [:label "Email: " email]
