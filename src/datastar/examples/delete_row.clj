@@ -22,24 +22,24 @@
     [:button {:data-on-click (h/raw (format "confirm('are you sure?') && @delete('/delete-row/delete/%s')" (:id contact)))}
      "Delete"]]])
 
-(defn fragment[]
-  [:div.delete-row
-   [:table
-    [:thead
-     [:tr
-      [:td "Name"]
-      [:td "Email"]
-      [:td "Status"]
-      [:td "Actions"]]]
-    [:tbody
-     (for [contact @state]
-       (delete-row contact))]]
-   [:div
-    [:button {:data-on-click (h/raw "@get('/delete-row/reset')")}
-     "Reset"]]])
-
 (defn render [_]
-  (html/response (html/page (fragment))))
+  (->
+   [:div#delete-row
+    [:table
+     [:thead
+      [:tr
+       [:td "Name"]
+       [:td "Email"]
+       [:td "Status"]
+       [:td "Actions"]]]
+     [:tbody
+      (for [contact @state]
+        (delete-row contact))]]
+    [:div
+     [:button {:data-on-click "@get('/delete-row/reset')"}
+      "Reset"]]]
+   html/page
+   html/response))
 
 (defn delete [req]
   (let [id (-> req :path-params :id parse-long)]
@@ -48,16 +48,14 @@
     (->sse-response
      req
      {on-open
-      (fn [sse-gen]
-        (d*/with-open-sse sse-gen
-          (d*/remove-fragment! sse-gen (str "contact_" id))
-          (d*/redirect! sse-gen "/delete-row")))})))
+      (fn [sse]
+        (d*/remove-fragment! sse (str "contact_" id))
+        (d*/redirect! sse "/delete-row"))})))
 
 (defn reset [req]
   (reset! state contacts)
   (->sse-response
    req
    {on-open
-    (fn [sse-gen]
-      (d*/with-open-sse sse-gen
-        (d*/merge-fragment! sse-gen (fragment))))}))
+    (fn [sse]
+      (d*/redirect! sse "/delete-row"))}))
